@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "lf-admin.fullname" . }}-redis
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "lf-admin-redis.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.redis.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "lf-admin-redis.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "lf-admin-redis.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "lf-admin.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.redis.image.repository }}:{{ .Values.redis.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.redis.image.pullPolicy }}
+          env:
+          - name: REDIS_PORT
+            value: "{{ .Values.redis.service.port }}"
+          ports:
+            - name: redis
+              containerPort: 6379
+              protocol: TCP
+          livenessProbe:
+            initialDelaySeconds: {{ .Values.redis.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.redis.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.redis.livenessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.redis.livenessProbe.successThreshold }}
+            failureThreshold: {{ .Values.redis.livenessProbe.failureThreshold }}
+            exec:
+              command:
+              - sh
+              - -c
+              - /health/ping_liveness_local.sh {{ .Values.redis.livenessProbe.timeoutSeconds }}
+          readinessProbe:
+            initialDelaySeconds: {{ .Values.redis.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.redis.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.redis.readinessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.redis.readinessProbe.successThreshold }}
+            failureThreshold: {{ .Values.redis.readinessProbe.failureThreshold }}
+            exec:
+              command:
+              - sh
+              - -c
+              - /health/ping_readiness_local.sh {{ .Values.redis.livenessProbe.timeoutSeconds }}
+          resources:
+            {{- toYaml .Values.redis.resources | nindent 12 }}
+          volumeMounts:
+            {{ range .Values.redis.volumeMounts }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+              readOnly: {{ .readOnly }}
+            {{- end }}
+      volumes:
+        {{ range .Values.redis.volumes }}
+        - name: {{ .name }}
+          configMap: 
+            name: {{ .name }}
+            defaultMode: {{ .defaultMode }}
+        {{- end }}

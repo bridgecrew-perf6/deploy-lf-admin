@@ -41,11 +41,23 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
+{{- define "lf-admin-redis.labels" -}}
+helm.sh/chart: {{ include "lf-admin.chart" . }}
+{{ include "lf-admin-redis.selectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
 
 {{/*
 Selector labels
 */}}
 {{- define "lf-admin.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "lf-admin.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+{{- define "lf-admin-redis.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "lf-admin.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}

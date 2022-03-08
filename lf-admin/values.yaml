@@ -28,6 +28,40 @@ podAnnotations: {}
 podSecurityContext: {}
   # fsGroup: 2000
 
+redis:
+  image:
+    pullPolicy: IfNotPresent
+    repository: redis
+    tag: 6.2
+  livenessProbe:
+    initialDelaySeconds: 30
+    periodSeconds: 5
+    successThreshold: 1
+    timeoutSeconds: 5
+  readinessProbe:
+    initialDelaySeconds: 30
+    periodSeconds: 5
+    successThreshold: 1
+    timeoutSeconds: 1
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 200m
+      memory: 200Mi
+    requests:
+      cpu: 100m
+      memory: 100Mi
+  service:
+    port: 6379
+    type: ClusterIP
+  volumeMounts:
+  - mountPath: /health
+    name: lf-admin-redis-health
+    readOnly: true
+  volumes:
+  - defaultMode: 493
+    name: lf-admin-redis-health
+
 securityContext: {}
   # capabilities:
   #   drop:
