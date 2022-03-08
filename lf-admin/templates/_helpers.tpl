@@ -58,8 +58,8 @@ app.kubernetes.io/name: {{ include "lf-admin.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 {{- define "lf-admin-redis.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "lf-admin.name" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/name: {{ include "lf-admin.name" . }}-redis
+app.kubernetes.io/instance: {{ .Release.Name }}-redis
 {{- end }}
 
 {{/*
