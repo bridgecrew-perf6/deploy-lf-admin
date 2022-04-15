@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: lf-admin-dev
+  namespace: argocd-skov-run
+  annotations:
+    argocd-image-updater.argoproj.io/image-list: lf-admin-dev=simcax/foreninglet-admin
+    argocd-image-updater.argoproj.io/write-back-method: git:repocreds
+    argocd-image-updater.argoproj.io/git-branch: master
+spec:
+  project: default
+
+  source: 
+    repoURL: https://github.com/simcax/deploy-lf-admin.git
+    targetRevision: HEAD
+    path: lf-admin
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: lf-admin-dev
+  syncPolicy:
+    syncOptions:
+    - CreateNamespace=true
+    automated:
+      selfHeal: true
+      prune: true

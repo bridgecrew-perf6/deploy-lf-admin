@@ -76,14 +76,13 @@ service:
 
 ingress:
   enabled: true
-  className: ""
+  className: "nginx"
   annotations: 
-    cert-manager.io/cluster-issuer: letsencrypt-production
+    cert-manager.io/cluster-issuer: cloudflare-issuer
     nginx.ingress.kubernetes.io/proxy-body-size: "50m"
     nginx.org/proxy-connect-timeout: "30s"
     nginx.org/proxy-read-timeout: "20s"
     nginx.org/client-max-body-size: "50m"
-    kubernetes.io/ingress.class: nginx
 
   hosts:
     - host: lf-admin.skov.run
