@@ -39,13 +39,13 @@ spec:
           - name: COOKIE_DOMAIN
             value: lf-admin.skov.run
           - name: API_PASSWORD
-            envFrom:
-            - secretRef:
+            valueFrom:
+              secretKeyRef:
                 name: lf-admin-api
                 key: API-PASSWORD
           - name: API_USERNAME
-            envFrom:
-            - secretRef:
+            valueFrom:
+              secretKeyRef:
                 name: lf-admin-api
                 key: API-USERNAME
           ports:
